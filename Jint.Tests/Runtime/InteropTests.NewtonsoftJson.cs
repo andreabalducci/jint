@@ -102,5 +102,19 @@ namespace Jint.Tests.Runtime
 
             Assert.Equal("[{\"Text\":\"Text1\",\"Value\":1},{\"Text\":\"Text2\",\"Value\":2,\"Null\":null,\"Date\":\"2015-06-25T00:00:00.000Z\"}]", result);
         }
+
+        [Fact]
+        public void EngineShouldStringifyJArrayValues()
+        {
+            var engine = new Engine();
+            var arr = new JArray();
+            
+            engine.SetValue("testSubject", arr);
+
+            var fromEngine = engine.Evaluate("return JSON.stringify(testSubject);");
+            var result = fromEngine.ToString();
+
+            Assert.Equal("[]", result);
+        }
     }
 }
