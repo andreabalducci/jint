@@ -15,6 +15,7 @@ namespace Jint.Runtime.Interop
 	/// </summary>
 	public sealed class ObjectWrapper : ObjectInstance, IObjectWrapper, IEquatable<ObjectWrapper>
     {
+        private static readonly JsString toJsonProperty = new("toJSON");
         private readonly TypeDescriptor _typeDescriptor;
 
         public ObjectWrapper(Engine engine, object obj)
@@ -104,6 +105,12 @@ namespace Jint.Runtime.Interop
             {
                 var index = (int) ((JsNumber) property)._value;
                 return (uint) index < list.Count ? FromObject(_engine, list[index]) : Undefined;
+            }
+
+            // workaround for JArray serialization
+            if (property == toJsonProperty && Target is IList)
+            {
+                return Undefined;
             }
 
             return base.Get(property, receiver);

@@ -1,5 +1,6 @@
 using Jint.Native.Date;
 using Jint.Runtime;
+using Jint.Runtime.Interop;
 using Newtonsoft.Json.Linq;
 
 namespace Jint.Tests.Runtime
@@ -104,17 +105,31 @@ namespace Jint.Tests.Runtime
         }
 
         [Fact]
-        public void EngineShouldStringifyJArrayValues()
+        public void EngineShouldStringifyEmptyJArray()
         {
             var engine = new Engine();
             var arr = new JArray();
-            
+
             engine.SetValue("testSubject", arr);
 
             var fromEngine = engine.Evaluate("return JSON.stringify(testSubject);");
             var result = fromEngine.ToString();
 
             Assert.Equal("[]", result);
+        }
+
+        [Fact]
+        public void EngineShouldStringifyJArrayOfJArray()
+        {
+            var engine = new Engine();
+            var arr = new JArray { new JArray("a") };
+
+            engine.SetValue("testSubject", arr);
+
+            var fromEngine = engine.Evaluate("return JSON.stringify(testSubject);");
+            var result = fromEngine.ToString();
+
+            Assert.Equal("[[\"a\"]]", result);
         }
     }
 }
