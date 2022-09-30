@@ -1,3 +1,4 @@
+using Jint.Native;
 using Jint.Native.Date;
 using Jint.Runtime;
 using Jint.Runtime.Interop;
@@ -130,6 +131,53 @@ namespace Jint.Tests.Runtime
             var result = fromEngine.ToString();
 
             Assert.Equal("[[\"a\"]]", result);
+        }
+
+        [Fact]
+        public void EngineShouldStringifyCustomFormat()
+        {
+            var engine = new Engine();
+            var arr = Array.Empty<int>();
+
+            engine.SetValue("testSubject", arr);
+
+            var fromEngine = engine.Evaluate
+            (
+                @"testSubject.toJSON = () => '*';
+                return JSON.stringify(testSubject);"
+            );
+            var result = fromEngine.ToString();
+
+            Assert.Equal("\"*\"", result);
+        }
+
+        [Fact]
+        public void EngineShouldStringifyCustomJArrayFormat()
+        {
+            var engine = new Engine(options =>
+            {
+                options.Interop.MemberAccessor = static (_, target, member) =>
+                {
+                    if (target is JArray && !int.TryParse(member, out var _))
+                    {
+                        return JsValue.Undefined;
+                    }
+
+                    return null;
+                };
+            });
+            var arr = new JArray { new JArray("a") };
+
+            engine.SetValue("testSubject", arr);
+
+            var fromEngine = engine.Evaluate
+            (
+                @"testSubject.toJSON = () => '*';
+                return JSON.stringify(testSubject);"
+            );
+            var result = fromEngine.ToString();
+
+            Assert.Equal("\"*\"", result);
         }
     }
 }
